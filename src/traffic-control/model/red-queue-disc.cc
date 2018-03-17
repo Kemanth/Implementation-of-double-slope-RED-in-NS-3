@@ -127,6 +127,16 @@ TypeId RedQueueDisc::GetTypeId (void)
                    BooleanValue (false),
                    MakeBooleanAccessor (&RedQueueDisc::m_isNonlinear),
                    MakeBooleanChecker ())
+    .AddAttribute ("DSRED",
+                   "True to enable Double Slope RED",
+                   BooleanValue (false),
+                   MakeBooleanAccessor (&RedQueueDisc::m_isDSRED),
+                   MakeBooleanChecker ())
+    .AddAttribute ("DsGamma",
+                   "Gamma for DSRED",
+                   DoubleValue (0.96),
+                   MakeDoubleAccessor (&RedQueueDisc::m_dsGamma),
+                   MakeDoubleChecker<double> ())
     .AddAttribute ("MinTh",
                    "Minimum average length threshold in packets/bytes",
                    DoubleValue (5),
@@ -765,6 +775,9 @@ RedQueueDisc::CalculatePNew (void)
 {
   NS_LOG_FUNCTION (this);
   double p;
+  double Km = (m_minTh + m_maxTh)/2;
+  double dsAlpha = 2 * (1 - m_dsGamma) / (m_maxTh - m_minTh);
+  double dsBeta = 2 * (m_dsGamma) / (m_maxTh - m_minTh);
 
   if (m_isGentle && m_qAvg >= m_maxTh)
     {
@@ -781,6 +794,14 @@ RedQueueDisc::CalculatePNew (void)
        */
       p = 1.0;
     }
+  else if(m_isDSRED && m_qAvg >= m_minTh && m_qAvg < Km)
+  	{
+  		p = dsAlpha * (m_qAvg - m_minTh);
+  	}
+  else if(m_isDSRED && m_qAvg >= Km && m_qAvg < m_maxTh)
+  	{
+  		p = 1 - m_dsGamma + dsBeta * (m_qAvg - Km);
+  	}	
   else
     {
       /*

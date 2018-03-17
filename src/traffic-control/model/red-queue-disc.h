@@ -303,11 +303,13 @@ private:
   bool m_isWait;            //!< True for waiting between dropped packets
   bool m_isGentle;          //!< True to increase dropping prob. slowly when m_qAvg exceeds m_maxTh
   bool m_isARED;            //!< True to enable Adaptive RED
+  bool m_isDSRED;           //!< True to enable Double Slope RED
   bool m_isAdaptMaxP;       //!< True to adapt m_curMaxP
   double m_minTh;           //!< Minimum threshold for m_qAvg (bytes or packets)
   double m_maxTh;           //!< Maximum threshold for m_qAvg (bytes or packets), should be >= 2 * m_minTh
   double m_qW;              //!< Queue weight given to cur queue size sample
   double m_lInterm;         //!< The max probability of dropping a packet
+  double m_dsGamma;
   Time m_targetDelay;       //!< Target average queuing delay in ARED
   Time m_interval;          //!< Time interval to update m_curMaxP
   double m_top;             //!< Upper bound for m_curMaxP in ARED
